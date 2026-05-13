@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>随便终结者 - 国风版</title>
+    <style>
+        :root {
+            --bg-paper: #f0e6d2;
+            --bg-paper-dark: #e1d3b8;
+            --text-dark: #2c251f;
+            --jade-green: #52705e;
+            --cinnabar-red: #8e352e;
+            --gold: #b39050;
+        }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body {
+            background: var(--bg-paper);
+            background-image: radial-gradient(circle at 50% 50%, var(--bg-paper) 0%, var(--bg-paper-dark) 100%);
+            color: var(--text-dark);
+            font-family: "KaiTi", "STKaiti", "华文楷体", "Songti SC", "SimSun", serif;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+            width: 100vw; height: 100vh; overflow: hidden;
+        }
+        #intro-screen {
+            position: fixed; inset: 0; background: var(--bg-paper); 
+            background-image: radial-gradient(circle at 50% 50%, var(--bg-paper) 0%, var(--bg-paper-dark) 100%);
+            z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 30px; text-align: left;
+        }
+        .intro-box {
+            border: 3px solid var(--gold); border-radius: 8px; padding: 30px 20px;
+            background: rgba(240, 230, 210, 0.8); box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 340px; position: relative;
+        }
+        .intro-box::after {
+            content: ''; position: absolute; top: 4px; left: 4px; right: 4px; bottom: 4px;
+            border: 1px solid rgba(179, 144, 80, 0.5); pointer-events: none; border-radius: 4px;
+        }
+        #intro-screen h2 { 
+            color: var(--text-dark); letter-spacing: 4px; text-align: center;
+            border-bottom: 2px solid var(--gold); padding-bottom: 15px; margin-top: 0; margin-bottom: 25px; 
+        }
+        #intro-screen ul { list-style: none; padding: 0; margin: 0 0 30px 0; }
+        #intro-screen li { font-size: 18px; line-height: 1.8; margin-bottom: 15px; color: var(--text-dark); }
+        #intro-screen b { color: var(--cinnabar-red); font-size: 20px;}
+        .start-btn {
+            background: var(--jade-green); color: var(--bg-paper); padding: 12px 40px;
+            border-radius: 4px; font-family: inherit; font-weight: bold; border: 2px solid var(--gold); font-size: 20px;
+            letter-spacing: 4px; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            display: block; margin: 0 auto;
+        }
+        .start-btn:active { transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0.2); }
+        .header { height: 15vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .badge {
+            font-size: 14px; padding: 4px 16px; border-radius: 4px;
+            letter-spacing: 2px; font-weight: bold; border: 2px solid var(--gold);
+            background: var(--jade-green); color: var(--bg-paper);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15); margin-bottom: 8px;
+            position: relative;
+        }
+        .badge::before, .badge::after {
+            content: ''; position: absolute; top: 50%; transform: translateY(-50%);
+            width: 4px; height: 4px; background: var(--gold); border-radius: 50%;
+        }
+        .badge::before { left: 4px; }
+        .badge::after { right: 4px; }
+        .status-a { background: var(--jade-green); }
+        .status-b { background: var(--cinnabar-red); }
+        #count { font-size: 14px; font-weight: bold; color: var(--text-dark); opacity: 0.8; }
+        .stage { 
+            position: relative; 
+            height: 55vh;           
+            aspect-ratio: 2 / 3;    
+            max-width: 85vw;        
+            perspective: 1000px; 
+        }
+        .card {
+            position: absolute; inset: 0;
+            background: var(--bg-paper-dark); 
+            border: 3px solid var(--gold); border-radius: 8px; 
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1.1), opacity 0.3s;
+        }
+        .card::after {
+            content: ''; position: absolute; top: 4px; left: 4px; right: 4px; bottom: 4px;
+            border: 1px solid rgba(179, 144, 80, 0.5); pointer-events: none; border-radius: 4px;
+        }
+        .card img { 
+            width: 100%; height: 100%; 
+            object-fit: contain; 
+            display: block; 
+        }
+        .controls { height: 25vh; width: 100%; display: flex; justify-content: center; align-items: center; gap: 50px; }
+        .btn {
+            width: 72px; height: 72px; border-radius: 50%; border: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px; font-family: inherit; font-weight: bold;
+            position: relative; transition: 0.2s; cursor: pointer;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05), 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .btn-no { background: var(--bg-paper); color: var(--cinnabar-red); border: 3px solid var(--cinnabar-red); }
+        .btn-no:active { background: var(--cinnabar-red); color: var(--bg-paper); transform: scale(0.9); }
+        .btn-yes { background: var(--bg-paper); color: var(--jade-green); border: 3px solid var(--jade-green); }
+        .btn-yes:active { background: var(--jade-green); color: var(--bg-paper); transform: scale(0.9); }
+        #wheel-area { display: none; width: 100%; text-align: center; padding-top: 5vh; }
+        .wheel-container { position: relative; width: 85vw; height: 85vw; max-width: 340px; max-height: 340px; margin: 0 auto; }
+        canvas { width: 100%; height: 100%; transition: transform 5s cubic-bezier(0.1, 0, 0, 1); border-radius: 50%; border: 4px solid var(--gold); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .pointer {
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent;
+            border-top: 35px solid var(--gold); z-index: 10; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));
+        }
+        .spin-btn {
+            margin-top: 40px; background: var(--gold); color: var(--bg-paper); padding: 12px 40px;
+            border-radius: 4px; font-family: inherit; font-weight: bold; border: 2px solid var(--text-dark); font-size: 18px;
+            letter-spacing: 2px; cursor: pointer; box-shadow: 0 4px 0 var(--text-dark);
+        }
+        .spin-btn:active { transform: translateY(4px); box-shadow: 0 0 0 var(--text-dark); }
+        #final-screen { display: none; position: fixed; inset: 0; background: rgba(44, 37, 31, 0.95); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
+        #final-screen p { color: var(--gold); font-size: 16px; letter-spacing: 4px; margin-bottom: 0; }
+        #final-screen h1 { font-size: 40px; margin: 15px 0 20px 0; color: var(--bg-paper); letter-spacing: 4px; text-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+        .final-img { 
+            height: 45vh; aspect-ratio: 2 / 3; border-radius: 8px; object-fit: contain; 
+            border: 3px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.8); background: var(--bg-paper-dark);
+        }
+        .retry-btn { margin-top: 40px; background: transparent; border: 2px solid var(--gold); color: var(--gold); padding: 10px 30px; border-radius: 4px; font-size: 16px; font-family: inherit; letter-spacing: 2px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="intro-screen">
+        <div class="intro-box">
+            <h2>【 玩 法 说 明 】</h2>
+            <ul>
+                <li><b>① 甲方先择：</b><br>看到想吃的点【可】，不想吃的点【不】。</li>
+                <li><b>② 乙方后选：</b><br>甲方选完20道菜后，将手机交给乙方，进行同样的操作。</li>
+                <li><b>③ 听天由命：</b><br>最后会将两人都选了【可】的菜品放入转盘，随机抽取最终结果！</li>
+            </ul>
+            <button class="start-btn" onclick="startGame()">开 始</button>
+        </div>
+    </div>
+
+    <div class="header" id="header">
+        <div id="badge" class="badge status-a">甲 方 抉 择</div>
+        <div id="count">剩余：20</div>
+    </div>
+
+    <div class="stage" id="stack"></div>
+
+    <div class="controls" id="controls">
+        <button class="btn btn-no" onclick="handleInput(false)">不</button>
+        <button class="btn btn-yes" onclick="handleInput(true)">可</button>
+    </div>
+
+    <div id="wheel-area">
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <canvas id="canvas" width="340" height="340"></canvas>
+        </div>
+        <button class="spin-btn" onclick="startSpin()">听天由命</button>
+    </div>
+
+    <div id="final-screen">
+        <p>天意所指</p>
+        <h1 id="res-name"></h1>
+        <img id="res-img" class="final-img" src="">
+        <button class="retry-btn" onclick="location.reload()">再来一局</button>
+    </div>
+
+<script>
+    function startGame() {
+        document.getElementById('intro-screen').style.display = 'none';
+    }
+
+    // 这里已修改为同文件夹下的本地路径
+    const foodDatabase = [
+        { name: "火锅", img: "huoguo.jpg" },
+        { name: "小龙虾", img: "xiaolongxia.jpg" },
+        { name: "烧烤", img: "shaokao.jpg" },
+        { name: "寿司", img: "shousi.jpg" },
+        { name: "汉堡", img: "hanbao.jpg" },
+        { name: "拉面", img: "lamian.jpg" },
+        { name: "披萨", img: "pisa.jpg" },
+        { name: "炸鸡", img: "zhaji.jpg" },
+        { name: "牛排", img: "niupai.jpg" },
+        { name: "螺蛳粉", img: "luosifen.jpg" },
+        { name: "意面", img: "yimian.jpg" },
+        { name: "烤鱼", img: "kaoyu.jpg" },
+        { name: "咖喱饭", img: "galifan.jpg" },
+        { name: "三明治", img: "sanmingzhi.jpg" },
+        { name: "拌饭", img: "banfan.jpg" },
+        { name: "早茶", img: "zaocha.jpg" },
+        { name: "海南鸡", img: "hainanjifan.jpg" },
+        { name: "塔可", img: "taco.jpg" },
+        { name: "小笼包", img: "xiaolongbao.jpg" },
+        { name: "麻辣烫", img: "malatang.jpg" }
+    ];
+
+    let currentPhase = 'A';
+    let aSet = new Set(), bSet = new Set();
+    let currentDeck = [];
+    let topIdx = 19;
+
+    function build() {
+        const stack = document.getElementById('stack');
+        stack.innerHTML = '';
+        currentDeck = [...foodDatabase].sort(() => Math.random() - 0.5);
+        currentDeck.forEach((item, i) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.zIndex = i;
+            const offset = 19 - i;
+            card.style.transform = `translate(${offset * 1}px, ${offset * 2}px)`; 
+            card.innerHTML = `<img src="${item.img}" alt="${item.name}">`;
+            stack.appendChild(card);
+            item.el = card;
+        });
+        topIdx = 19;
+        document.getElementById('count').innerText = `剩余：20`;
+    }
+
+    function handleInput(isYes) {
+        if (topIdx < 0) return;
+        const item = currentDeck[topIdx];
+        if (isYes) {
+            if (currentPhase === 'A') aSet.add(item.name); else bSet.add(item.name);
+            item.el.style.transform = `translateX(150vw) rotate(30deg)`;
+        } else {
+            item.el.style.transform = `translateX(-150vw) rotate(-30deg)`;
+        }
+        item.el.style.opacity = '0';
+        topIdx--;
+        document.getElementById('count').innerText = `剩余：${topIdx + 1}`;
+        if (topIdx < 0) setTimeout(next, 500);
+    }
+
+    function next() {
+        if (currentPhase === 'A') {
+            currentPhase = 'B';
+            const badge = document.getElementById('badge');
+            badge.innerText = "乙 方 抉 择";
+            badge.className = "badge status-b";
+            alert("甲方选择完毕，请将手机交给乙方！");
+            build();
+        } else {
+            initWheel();
+        }
+    }
+
+    function initWheel() {
+        const pool = foodDatabase.filter(f => aSet.has(f.name) && bSet.has(f.name));
+        document.getElementById('header').style.display = 'none';
+        document.getElementById('stack').style.display = 'none';
+        document.getElementById('controls').style.display = 'none';
+        document.getElementById('wheel-area').style.display = 'block';
+
+        const finalOptions = pool.length > 0 ? pool : [foodDatabase[Math.floor(Math.random()*20)]];
+        window.resPool = finalOptions;
+        drawWheel(finalOptions);
+    }
+
+    function drawWheel(list) {
+        const ctx = document.getElementById('canvas').getContext('2d');
+        const arc = (Math.PI*2)/list.length;
+        list.forEach((f, i) => {
+            ctx.fillStyle = i % 2 === 0 ? "#52705e" : "#8e352e";
+            ctx.beginPath(); ctx.moveTo(170,170); ctx.arc(170,170,170,i*arc,(i+1)*arc); ctx.fill();
+            ctx.strokeStyle = "#b39050";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.save(); ctx.translate(170,170); ctx.rotate(i*arc+arc/2);
+            ctx.fillStyle = "#f0e6d2"; 
+            ctx.font = "bold 16px 'KaiTi', serif";
+            ctx.fillText(f.name, 65, 6); ctx.restore();
+        });
+    }
+
+    function startSpin() {
+        const canvas = document.getElementById('canvas');
+        const deg = Math.floor(Math.random()*360) + 3600;
+        canvas.style.transform = `rotate(${deg}deg)`;
+        setTimeout(() => {
+            const winner = window.resPool[Math.floor(((360-(deg%360)+270)%360)/(360/window.resPool.length))];
+            document.getElementById('final-screen').style.display = 'flex';
+            document.getElementById('res-name').innerText = `【${winner.name}】`;
+            document.getElementById('res-img').src = winner.img;
+        }, 5200);
+    }
+
+    build();
+</script>
+</body>
+</html>
